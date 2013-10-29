@@ -735,7 +735,7 @@ class phpZenfolio {
  * The original source is distributed under the Apache License Version 2.0
  */
 
-class HttpRequestException extends Exception {}
+class PhpZenfolioHttpException extends Exception {}
 
 interface PhpZenfolioRequestProcessor
 {
@@ -1164,7 +1164,7 @@ class PhpZenfolioCurlRequestProcessor implements PhpZenfolioRequestProcessor
 		// set proxy, if needed
         if ( $config['proxy_host'] ) {
             if ( ! $config['proxy_port'] ) {
-                throw new HttpRequestException( 'Proxy port not provided' );
+                throw new PhpZenfolioHttpException( 'Proxy port not provided' );
             }
             $options[CURLOPT_PROXY] = $config['proxy_host'] . ':' . $config['proxy_port'];
             if ( $config['proxy_user'] ) {
@@ -1183,11 +1183,11 @@ class PhpZenfolioCurlRequestProcessor implements PhpZenfolioRequestProcessor
 		$body = curl_exec( $ch );
 
 		if ( curl_errno( $ch ) !== 0 ) {
-			throw new HttpRequestException( sprintf( '%s: CURL Error %d: %s', __CLASS__, curl_errno( $ch ), curl_error( $ch ) ), curl_errno( $ch ) );
+			throw new PhpZenfolioHttpException( sprintf( '%s: CURL Error %d: %s', __CLASS__, curl_errno( $ch ), curl_error( $ch ) ), curl_errno( $ch ) );
 		}
 
 		if ( substr( curl_getinfo( $ch, CURLINFO_HTTP_CODE ), 0, 1 ) != 2 ) {
-			throw new HttpRequestException( sprintf( 'Bad return code (%1$d) for: %2$s', curl_getinfo( $ch, CURLINFO_HTTP_CODE ), $url ), curl_errno( $ch ) );
+			throw new PhpZenfolioHttpException( sprintf( 'Bad return code (%1$d) for: %2$s', curl_getinfo( $ch, CURLINFO_HTTP_CODE ), $url ), curl_errno( $ch ) );
 		}
 
 		curl_close( $ch );
