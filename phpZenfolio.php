@@ -107,8 +107,8 @@ class phpZenfolio {
 			throw new PhpZenfolioException( 'Application name missing.', -10001 );
 		}
 		$this->AppName = $args['AppName'];
-        // All calls to the API are done via POST using my own constructed httpRequest class
-		$this->req = new httpRequest();
+        // All calls to the API are done via POST using my own constructed zenHttpRequest class
+		$this->req = new zenHttpRequest();
 		$this->req->setConfig( array( 'adapter' => $this->adapter, 'follow_redirects' => TRUE, 'max_redirects' => 3, 'ssl_verify_peer' => FALSE, 'ssl_verify_host' => FALSE, 'connect_timeout' => 5 ) );
 		$this->req->setHeader( array( 'User-Agent' => "{$this->AppName} using phpZenfolio/" . phpZenfolio::$version,
 									  'X-Zenfolio-User-Agent' => "{$this->AppName} using phpZenfolio/" . phpZenfolio::$version,
@@ -513,7 +513,7 @@ class phpZenfolio {
 		}
 
 		// Create a new object as we still need the other request object
-		$upload_req = new httpRequest();
+		$upload_req = new zenHttpRequest();
 		$upload_req->setConfig( array( 'adapter' => $this->adapter, 'follow_redirects' => TRUE, 'max_redirects' => 3, 'ssl_verify_peer' => FALSE, 'ssl_verify_host' => FALSE, 'connect_timeout' => 60 ) );
 		$upload_req->setMethod( 'post' );
 		$upload_req->setHeader( array( 'User-Agent' => "{$this->AppName} using phpZenfolio/" . phpZenfolio::$version,
@@ -744,7 +744,7 @@ interface PhpZenfolioRequestProcessor
 	public function getHeaders();
 }
 
-class httpRequest
+class zenHttpRequest
 {
 	private $method = 'POST';
 	private $url;
@@ -816,7 +816,7 @@ class httpRequest
 	 * @param mixed			$config An array of options or a string name with a
 	 *						corresponding $value
 	 * @param mixed			$value
-	 * @return httpRequest
+	 * @return zenHttpRequest
 	 */
 	public function setConfig( $config, $value = null )
     {
