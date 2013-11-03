@@ -107,8 +107,8 @@ class phpZenfolio {
 			throw new PhpZenfolioException( 'Application name missing.', -10001 );
 		}
 		$this->AppName = $args['AppName'];
-        // All calls to the API are done via POST using my own constructed zenHttpRequest class
-		$this->req = new zenHttpRequest();
+        // All calls to the API are done via POST using my own constructed httpRequest class
+		$this->req = new httpRequest();
 		$this->req->setConfig( array( 'adapter' => $this->adapter, 'follow_redirects' => TRUE, 'max_redirects' => 3, 'ssl_verify_peer' => FALSE, 'ssl_verify_host' => FALSE, 'connect_timeout' => 5 ) );
 		$this->req->setHeader( array( 'User-Agent' => "{$this->AppName} using phpZenfolio/" . phpZenfolio::$version,
 									  'X-Zenfolio-User-Agent' => "{$this->AppName} using phpZenfolio/" . phpZenfolio::$version,
@@ -175,9 +175,9 @@ class phpZenfolio {
 		$this->cache_table  = ( array_key_exists( 'table', $args ) ) ? $args['table'] : 'phpzenfolio_cache';
 
         if ( $this->cacheType == 'db' ) {
-    		require_once 'MDB2.php';
+    		//require_once 'MDB2.php';
 
-			$db =& MDB2::connect( $args['dsn'] );
+			/*$db =& MDB2::connect( $args['dsn'] );
 			if ( PEAR::isError( $db ) ) {
 				$this->cacheType = FALSE;
 				return "CACHING DISABLED: {$db->getMessage()} {$db->getUserInfo()} ({$db->getCode()})";
@@ -192,13 +192,15 @@ class phpZenfolio {
 			$db->loadModule('Manager');
 			$db->createTable( $this->cache_table, $fields, $options );
 			$db->setOption('idxname_format', '%s'); // Make sure index name doesn't have the prefix
-			$db->createIndex( $this->cache_table, 'request', array( 'fields' => array( 'request' => array() ) ) );
-
+			$db->createIndex( $this->cache_table, 'request', array( 'fields' => array( 'request' => array() ) ) );*/
+			ci()->load->model('albums/zenfolio_cache_m');
+			ci()->zenfolio_cache_m->optimise();
+			/*
             if ( $db->queryOne( "SELECT COUNT(*) FROM $this->cache_table") > $this->max_cache_rows ) {
 				$diff = time() - $this->cache_expire;
                 $db->exec( "DELETE FROM {$this->cache_table} WHERE expiration < {$diff}" );
                 $db->query( 'OPTIMIZE TABLE ' . $this->cache_table );
-            }
+            }*/
         } elseif ( $this->cacheType ==  'fs' ) {
 			if ( file_exists( $args['cache_dir'] ) && ( is_dir( $args['cache_dir'] ) ) ) {
 				$this->cache_dir = realpath( $args['cache_dir'] ).'/phpZenfolio/';
@@ -241,11 +243,12 @@ class phpZenfolio {
 		$diff = time() - $expire;
 
 		if ( $this->cacheType == 'db' ) {
-			$result = $this->cache_db->queryOne( 'SELECT response FROM ' . $this->cache_table . ' WHERE request = ' . $this->cache_db->quote( $reqhash ) . ' AND ' . $this->cache_db->quote( $diff ) . ' < expiration' );
+			$result = ci()->zenfolio_cache_m->get_cached($reqhash, $diff);
+			/*$result = $this->cache_db->queryOne( 'SELECT response FROM ' . $this->cache_table . ' WHERE request = ' . $this->cache_db->quote( $reqhash ) . ' AND ' . $this->cache_db->quote( $diff ) . ' < expiration' );
 			if ( PEAR::isError( $result ) ) {
 				throw new PhpZenfolioException( $result );
-			}
-			if ( !empty( $result ) ) {
+			}*/
+			if ( !$result ) {
                 return $result;
             }
         } elseif ( $this->cacheType == 'fs' ) {
@@ -272,17 +275,9 @@ class phpZenfolio {
 		if ( ! strpos( $request['method'], 'Authenticate' ) ) {
 			$reqhash = md5( serialize( $request ) );
 			if ( $this->cacheType == 'db' ) {
-				if ( $this->cache_db->queryOne( "SELECT COUNT(*) FROM {$this->cache_table} WHERE request = '$reqhash'" ) ) {
-					$sql = 'UPDATE ' . $this->cache_table . ' SET response = '. $this->cache_db->quote( $response ) . ', expiration = ' . $this->cache_db->quote( time() ) . ' WHERE request = ' . $this->cache_db->quote( $reqhash ) ;
-					$result = $this->cache_db->exec( $sql );
-				} else {
-					$sql = 'INSERT INTO ' . $this->cache_table . ' (request, response, expiration) VALUES (' . $this->cache_db->quote( $reqhash ) .', ' . $this->cache_db->quote( strtr( $response, "'", "\'" ) ) . ', ' . $this->cache_db->quote( time() ) . ')';
-					$result = $this->cache_db->exec( $sql );
-				}
-				if ( PEAR::isError( $result ) ) {
-					// TODO: Create unit test for this
-					throw new PhpZenfolioException( $result );
-				}
+			
+				$result = ci()->zenfolio_cache_m->cache($reqhash, $response);
+				
 				return $result;
 			} elseif ( $this->cacheType == 'fs' ) {
 				$file = $this->cache_dir . '/' . $reqhash . '.cache';
@@ -513,7 +508,7 @@ class phpZenfolio {
 		}
 
 		// Create a new object as we still need the other request object
-		$upload_req = new zenHttpRequest();
+		$upload_req = new httpRequest();
 		$upload_req->setConfig( array( 'adapter' => $this->adapter, 'follow_redirects' => TRUE, 'max_redirects' => 3, 'ssl_verify_peer' => FALSE, 'ssl_verify_host' => FALSE, 'connect_timeout' => 60 ) );
 		$upload_req->setMethod( 'post' );
 		$upload_req->setHeader( array( 'User-Agent' => "{$this->AppName} using phpZenfolio/" . phpZenfolio::$version,
@@ -585,6 +580,7 @@ class phpZenfolio {
 	public function __call( $method, $arguments )
 	{
 		$args = $arguments;
+		
 		$this->request( $method, $args );
 		$result = $this->parsed_response['result'];
 		if ( $method == 'AuthenticatePlain' ) {
@@ -735,7 +731,7 @@ class phpZenfolio {
  * The original source is distributed under the Apache License Version 2.0
  */
 
-class PhpZenfolioHttpException extends Exception {}
+class HttpRequestException extends Exception {}
 
 interface PhpZenfolioRequestProcessor
 {
@@ -744,7 +740,7 @@ interface PhpZenfolioRequestProcessor
 	public function getHeaders();
 }
 
-class zenHttpRequest
+class httpRequest
 {
 	private $method = 'POST';
 	private $url;
@@ -816,7 +812,7 @@ class zenHttpRequest
 	 * @param mixed			$config An array of options or a string name with a
 	 *						corresponding $value
 	 * @param mixed			$value
-	 * @return zenHttpRequest
+	 * @return httpRequest
 	 */
 	public function setConfig( $config, $value = null )
     {
@@ -1164,7 +1160,7 @@ class PhpZenfolioCurlRequestProcessor implements PhpZenfolioRequestProcessor
 		// set proxy, if needed
         if ( $config['proxy_host'] ) {
             if ( ! $config['proxy_port'] ) {
-                throw new PhpZenfolioHttpException( 'Proxy port not provided' );
+                throw new HttpRequestException( 'Proxy port not provided' );
             }
             $options[CURLOPT_PROXY] = $config['proxy_host'] . ':' . $config['proxy_port'];
             if ( $config['proxy_user'] ) {
@@ -1183,11 +1179,11 @@ class PhpZenfolioCurlRequestProcessor implements PhpZenfolioRequestProcessor
 		$body = curl_exec( $ch );
 
 		if ( curl_errno( $ch ) !== 0 ) {
-			throw new PhpZenfolioHttpException( sprintf( '%s: CURL Error %d: %s', __CLASS__, curl_errno( $ch ), curl_error( $ch ) ), curl_errno( $ch ) );
+			throw new HttpRequestException( sprintf( '%s: CURL Error %d: %s', __CLASS__, curl_errno( $ch ), curl_error( $ch ) ), curl_errno( $ch ) );
 		}
 
 		if ( substr( curl_getinfo( $ch, CURLINFO_HTTP_CODE ), 0, 1 ) != 2 ) {
-			throw new PhpZenfolioHttpException( sprintf( 'Bad return code (%1$d) for: %2$s', curl_getinfo( $ch, CURLINFO_HTTP_CODE ), $url ), curl_errno( $ch ) );
+			throw new HttpRequestException( sprintf( 'Bad return code (%1$d) for: %2$s', curl_getinfo( $ch, CURLINFO_HTTP_CODE ), $url ), curl_errno( $ch ) );
 		}
 
 		curl_close( $ch );
