@@ -107,8 +107,8 @@ class phpZenfolio {
 			throw new PhpZenfolioException( 'Application name missing.', -10001 );
 		}
 		$this->AppName = $args['AppName'];
-        // All calls to the API are done via POST using my own constructed httpRequest class
-		$this->req = new httpRequest();
+        // All calls to the API are done via POST using my own constructed zenHttpRequest class
+		$this->req = new zenHttpRequest();
 		$this->req->setConfig( array( 'adapter' => $this->adapter, 'follow_redirects' => TRUE, 'max_redirects' => 3, 'ssl_verify_peer' => FALSE, 'ssl_verify_host' => FALSE, 'connect_timeout' => 5 ) );
 		$this->req->setHeader( array( 'User-Agent' => "{$this->AppName} using phpZenfolio/" . phpZenfolio::$version,
 									  'X-Zenfolio-User-Agent' => "{$this->AppName} using phpZenfolio/" . phpZenfolio::$version,
@@ -508,7 +508,7 @@ class phpZenfolio {
 		}
 
 		// Create a new object as we still need the other request object
-		$upload_req = new httpRequest();
+		$upload_req = new zenHttpRequest();
 		$upload_req->setConfig( array( 'adapter' => $this->adapter, 'follow_redirects' => TRUE, 'max_redirects' => 3, 'ssl_verify_peer' => FALSE, 'ssl_verify_host' => FALSE, 'connect_timeout' => 60 ) );
 		$upload_req->setMethod( 'post' );
 		$upload_req->setHeader( array( 'User-Agent' => "{$this->AppName} using phpZenfolio/" . phpZenfolio::$version,
@@ -731,7 +731,7 @@ class phpZenfolio {
  * The original source is distributed under the Apache License Version 2.0
  */
 
-class HttpRequestException extends Exception {}
+class zenHttpRequestException extends Exception {}
 
 interface PhpZenfolioRequestProcessor
 {
@@ -740,7 +740,7 @@ interface PhpZenfolioRequestProcessor
 	public function getHeaders();
 }
 
-class httpRequest
+class zenHttpRequest
 {
 	private $method = 'POST';
 	private $url;
@@ -812,7 +812,7 @@ class httpRequest
 	 * @param mixed			$config An array of options or a string name with a
 	 *						corresponding $value
 	 * @param mixed			$value
-	 * @return httpRequest
+	 * @return zenHttpRequest
 	 */
 	public function setConfig( $config, $value = null )
     {
@@ -1160,7 +1160,7 @@ class PhpZenfolioCurlRequestProcessor implements PhpZenfolioRequestProcessor
 		// set proxy, if needed
         if ( $config['proxy_host'] ) {
             if ( ! $config['proxy_port'] ) {
-                throw new HttpRequestException( 'Proxy port not provided' );
+                throw new zenHttpRequestException( 'Proxy port not provided' );
             }
             $options[CURLOPT_PROXY] = $config['proxy_host'] . ':' . $config['proxy_port'];
             if ( $config['proxy_user'] ) {
@@ -1179,11 +1179,11 @@ class PhpZenfolioCurlRequestProcessor implements PhpZenfolioRequestProcessor
 		$body = curl_exec( $ch );
 
 		if ( curl_errno( $ch ) !== 0 ) {
-			throw new HttpRequestException( sprintf( '%s: CURL Error %d: %s', __CLASS__, curl_errno( $ch ), curl_error( $ch ) ), curl_errno( $ch ) );
+			throw new zenHttpRequestException( sprintf( '%s: CURL Error %d: %s', __CLASS__, curl_errno( $ch ), curl_error( $ch ) ), curl_errno( $ch ) );
 		}
 
 		if ( substr( curl_getinfo( $ch, CURLINFO_HTTP_CODE ), 0, 1 ) != 2 ) {
-			throw new HttpRequestException( sprintf( 'Bad return code (%1$d) for: %2$s', curl_getinfo( $ch, CURLINFO_HTTP_CODE ), $url ), curl_errno( $ch ) );
+			throw new zenHttpRequestException( sprintf( 'Bad return code (%1$d) for: %2$s', curl_getinfo( $ch, CURLINFO_HTTP_CODE ), $url ), curl_errno( $ch ) );
 		}
 
 		curl_close( $ch );
