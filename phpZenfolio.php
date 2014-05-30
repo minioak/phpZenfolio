@@ -101,7 +101,7 @@ class phpZenfolio {
 	public function __construct()
 	{
 		$args = phpZenfolio::processArgs( func_get_args() );
-		$this->APIVer = ( array_key_exists( 'APIVer', $args ) ) ? $args['APIVer'] : '1.6';
+		$this->APIVer = ( array_key_exists( 'APIVer', $args ) ) ? $args['APIVer'] : '1.7';
 		// Set the Application Name
 		if ( ! isset( $args['AppName'] ) ) {
 			throw new PhpZenfolioException( 'Application name missing.', -10001 );
