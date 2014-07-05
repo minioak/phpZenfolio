@@ -248,8 +248,8 @@ class phpZenfolio {
 			if ( PEAR::isError( $result ) ) {
 				throw new PhpZenfolioException( $result );
 			}*/
-			if ( !$result ) {
-                return $result;
+			if ( $result ) {
+                return $result->response;
             }
         } elseif ( $this->cacheType == 'fs' ) {
             $file = $this->cache_dir . '/' . $reqhash . '.cache';
