@@ -56,7 +56,7 @@ class PhpZenfolioException extends Exception {}
 class phpZenfolio {
 	static $version = '1.2';
 	private $cacheType = FALSE;
-	private $cache_expire = 3600;
+	private $cache_expire = 259200;
 	private $keyring;
 	private $id;
 	protected $authToken;
