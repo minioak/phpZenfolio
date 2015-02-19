@@ -789,7 +789,7 @@ class zenHttpRequest
 	 * @param string	$method Request method to use (default 'POST')
 	 * @param int		$timeout Timeout in seconds (default 30)
 	 */
-	public function __construct( $url = NULL, $method = 'POST', $timeout = 30 )
+	public function __construct( $url = NULL, $method = 'POST', $timeout = 90 )
 	{
 		$this->method = strtoupper( $method );
 		$this->url = $url;
