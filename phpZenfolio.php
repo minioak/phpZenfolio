@@ -239,7 +239,7 @@ class phpZenfolio {
 	{
 		$request['authToken']       = ''; // Unset authToken
        	$reqhash = md5( serialize( $request ) );
-		$expire = ( strpos( $request['method'], 'login' ) ) ? 21600 : $this->cache_expire;
+		$expire = ( strpos( $request['method'], 'login' ) ) ? 259200 : $this->cache_expire;
 		$diff = time() - $expire;
 
 		if ( $this->cacheType == 'db' ) {
