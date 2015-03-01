@@ -193,8 +193,7 @@ class phpZenfolio {
 			$db->createTable( $this->cache_table, $fields, $options );
 			$db->setOption('idxname_format', '%s'); // Make sure index name doesn't have the prefix
 			$db->createIndex( $this->cache_table, 'request', array( 'fields' => array( 'request' => array() ) ) );*/
-			ci()->load->model('apps/zenfolio_cache_m');
-			ci()->zenfolio_cache_m->optimise();
+			
 			/*
             if ( $db->queryOne( "SELECT COUNT(*) FROM $this->cache_table") > $this->max_cache_rows ) {
 				$diff = time() - $this->cache_expire;
@@ -248,6 +247,7 @@ class phpZenfolio {
 			if ( PEAR::isError( $result ) ) {
 				throw new PhpZenfolioException( $result );
 			}*/
+			ci()->zenfolio_cache_m->optimise();
 			if ( $result ) {
                 return $result->response;
             }
