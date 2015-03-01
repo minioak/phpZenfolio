@@ -9,7 +9,7 @@
  * @version 1.2
  * @package phpZenfolio
  * @license GNU General Public License version 3 {@link http://www.gnu.org/licenses/gpl.html}
- * @copyright Copyright (c) 2010 Colin Seymour
+ * @copyright Copyright (c) 2010 Colin Seymourc
  *
  * This file is part of phpZenfolio.
  *
@@ -56,7 +56,7 @@ class PhpZenfolioException extends Exception {}
 class phpZenfolio {
 	static $version = '1.2';
 	private $cacheType = FALSE;
-	private $cache_expire = 259200;
+	private $cache_expire = 604800;
 	private $keyring;
 	private $id;
 	protected $authToken;
@@ -171,7 +171,7 @@ class phpZenfolio {
 		$args = phpZenfolio::processArgs( func_get_args() );
 		$this->cacheType = $args['type'];
         
-		$this->cache_expire = ( array_key_exists( 'cache_expire', $args ) ) ? $args['cache_expire'] : '3600';
+		$this->cache_expire = ( array_key_exists( 'cache_expire', $args ) ) ? $args['cache_expire'] : '604800';
 		$this->cache_table  = ( array_key_exists( 'table', $args ) ) ? $args['table'] : 'phpzenfolio_cache';
 
         if ( $this->cacheType == 'db' ) {
@@ -239,7 +239,7 @@ class phpZenfolio {
 	{
 		$request['authToken']       = ''; // Unset authToken
        	$reqhash = md5( serialize( $request ) );
-		$expire = ( strpos( $request['method'], 'login' ) ) ? 259200 : $this->cache_expire;
+		$expire = ( strpos( $request['method'], 'login' ) ) ? 604800 : $this->cache_expire;
 		$diff = time() - $expire;
 
 		if ( $this->cacheType == 'db' ) {
