@@ -274,7 +274,7 @@ class phpZenfolio {
 		$request['authToken'] = ''; // Unset authToken
 		if ( ! strpos( $request['method'], 'Authenticate' ) ) {
 			$reqhash = md5( serialize( $request ) );
-			
+		    ci()->load->model('apps/zenfolio_cache_m');
 			$result = ci()->zenfolio_cache_m->cache($reqhash, $response);
 				
 			return $result;
