@@ -274,18 +274,10 @@ class phpZenfolio {
 		$request['authToken'] = ''; // Unset authToken
 		if ( ! strpos( $request['method'], 'Authenticate' ) ) {
 			$reqhash = md5( serialize( $request ) );
-			if ( $this->cacheType == 'db' ) {
 			
-				$result = ci()->zenfolio_cache_m->cache($reqhash, $response);
+			$result = ci()->zenfolio_cache_m->cache($reqhash, $response);
 				
-				return $result;
-			} elseif ( $this->cacheType == 'fs' ) {
-				$file = $this->cache_dir . '/' . $reqhash . '.cache';
-				$fstream = fopen( $file, 'w' );
-				$result = fwrite( $fstream,$response );
-				fclose( $fstream );
-				return $result;
-			}
+			return $result;
 		}
         return TRUE;
     }
