@@ -675,9 +675,9 @@ class phpZenfolio {
 	  */
 	 public static function imageUrl( $photo, $size, $host = false ) {
          if ($host === false) {
-             $host = $photo['UrlHost'];
+             $host = 'http://'.$photo['UrlHost'];
          }
-		 return "http://$host/{$photo['UrlCore']}-{$size}.jpg?sn={$photo['Sequence']}&tk={$photo['UrlToken']}";
+		 return "$host/{$photo['UrlCore']}-{$size}.jpg?sn={$photo['Sequence']}&tk={$photo['UrlToken']}";
 	 }
 
 	/**
