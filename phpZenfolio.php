@@ -673,8 +673,11 @@ class phpZenfolio {
 	  *					for a list of sizes.
 	  * @return string
 	  */
-	 public static function imageUrl( $photo, $size ) {
-		 return "http://{$photo['UrlHost']}/{$photo['UrlCore']}-{$size}.jpg?sn={$photo['Sequence']}&tk={$photo['UrlToken']}";
+	 public static function imageUrl( $photo, $size, $host = false ) {
+         if ($host === false) {
+             $host = $photo['UrlHost'];
+         }
+		 return "http://$host/{$photo['UrlCore']}-{$size}.jpg?sn={$photo['Sequence']}&tk={$photo['UrlToken']}";
 	 }
 
 	/**
