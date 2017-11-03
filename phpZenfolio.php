@@ -1134,8 +1134,7 @@ class PhpZenfolioCurlRequestProcessor implements PhpZenfolioRequestProcessor
 			CURLOPT_BUFFERSIZE		=> $config['buffer_size'],
 			CURLOPT_HTTPHEADER		=> $merged_headers,
 			CURLOPT_RETURNTRANSFER	=> TRUE,
-            CURLOPT_SSLVERSION => 4,
-            CURLOPT_SSL_CIPHER_LIST => 'TLSv1'
+            		CURLOPT_SSLVERSION => 6,
 		);
 
 		if ( $this->can_followlocation && $config['follow_redirects'] ) {
